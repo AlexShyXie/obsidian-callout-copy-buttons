@@ -1,6 +1,7 @@
 import { type PluginSettingsManager } from "./settings";
 import {
   addCopyPlainTextButtonToCalloutDiv,
+  addSelectCalloutButtonToCalloutDiv,
   moveEditBlockButtonToCalloutActionButtonsWrapper,
 } from "./utils/addCopyButtonToCallout";
 
@@ -77,5 +78,6 @@ function addCopyPlainTextButtonAndMoveEditBlockButton({
   pluginSettingsManager: PluginSettingsManager;
 }): void {
   addCopyPlainTextButtonToCalloutDiv({ calloutNode, isCMCalloutNode, pluginSettingsManager });
+  addSelectCalloutButtonToCalloutDiv({ calloutNode, isCMCalloutNode, ctx: null, pluginSettingsManager });
   moveEditBlockButtonToCalloutActionButtonsWrapper(calloutNode);
 }

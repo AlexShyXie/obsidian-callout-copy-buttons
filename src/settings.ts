@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { type Plugin, PluginSettingTab, Setting } from "obsidian";
+import { type App, type Plugin, PluginSettingTab, Setting } from "obsidian";
 
 type SourceModeSettings = {
   showCopyButtonOnlyOnLineHover: boolean;
@@ -8,6 +8,7 @@ type SourceModeSettings = {
 type ReadingModeSettings = {
   showCopyMarkdownButton: boolean;
   showCopyPlainTextButton: boolean;
+  showSelectCalloutButton: boolean;
 };
 
 type PluginSettings = {
@@ -38,6 +39,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
   readingModeSettings: {
     showCopyMarkdownButton: true,
     showCopyPlainTextButton: true,
+    showSelectCalloutButton: true,
   },
 };
 
@@ -53,6 +55,10 @@ export class PluginSettingsManager extends PluginSettingTab {
     this.addSettingTab();
   }
 
+  public getApp(): App {
+    return this.plugin.app;
+  }
+
   /**
    * Returns the class names for the copy buttons based on the plugin settings.
    */
@@ -63,6 +69,12 @@ export class PluginSettingsManager extends PluginSettingTab {
   private async loadSettings(): Promise<PluginSettings> {
     const loadedSettings = (await this.plugin.loadData()) as PluginSettings | null;
     if (loadedSettings !== null) {
+      // Merge the reading mode settings with the defaults so that settings added in newer versions
+      // have values for users upgrading from older versions of the plugin
+      loadedSettings.readingModeSettings = {
+        ...DEFAULT_SETTINGS.readingModeSettings,
+        ...loadedSettings.readingModeSettings,
+      };
       return loadedSettings;
     }
     return await this.initializeSettings();
@@ -111,12 +123,14 @@ export class PluginSettingsManager extends PluginSettingTab {
     const {
       showCopyMarkdownButton: showCopyMarkdownButton,
       showCopyPlainTextButton: showCopyPlainTextButton,
+      showSelectCalloutButton: showSelectCalloutButton,
     } = this.getSetting("readingModeSettings");
     return {
       "show-copy-format-indicators": showCopyFormatIndicators,
       "show-source-mode-copy-button-only-on-line-hover": showCopyButtonOnlyOnLineHover,
       "show-reading-mode-copy-markdown-buttons": showCopyMarkdownButton,
       "show-reading-mode-copy-plain-text-buttons": showCopyPlainTextButton,
+      "show-reading-mode-copy-select-buttons": showSelectCalloutButton,
     };
   }
 
@@ -184,6 +198,7 @@ export class PluginSettingsManager extends PluginSettingTab {
     new Setting(this.containerEl).setName("Reading mode").setHeading();
     this.displayShowCopyMarkdownButtonSetting();
     this.displayShowCopyPlainTextButtonSetting();
+    this.displayShowSelectCalloutButtonSetting();
   }
 
   private displayShowCopyMarkdownButtonSetting(): void {
@@ -205,6 +220,19 @@ export class PluginSettingsManager extends PluginSettingTab {
         toggle
           .setValue(this.settings.readingModeSettings.showCopyPlainTextButton)
           .onChange((value) => this.setReadingModeSetting("showCopyPlainTextButton", value))
+      );
+  }
+
+  private displayShowSelectCalloutButtonSetting(): void {
+    new Setting(this.containerEl)
+      .setName("Show 'Select (in editor)' button")
+      .setDesc(
+        "Whether to add 'Select (in editor)' buttons to callout blocks. Clicking one selects the whole callout block as plain text in the editor, switching from Reading Mode to the editor if needed."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.settings.readingModeSettings.showSelectCalloutButton)
+          .onChange((value) => this.setReadingModeSetting("showSelectCalloutButton", value))
       );
   }
 

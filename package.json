@@ -3,9 +3,9 @@
   "name": "obsidian-callout-copy-buttons",
   "description": "An Obsidian plugin that adds copy buttons to callout blocks in your notes.",
   "main": "./main.js",
-  "author": "Aly Thobani",
+  "author": "AlexShyXie",
   "license": "GPL-3.0-only",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "build": "npx webpack",
     "watch": "npx webpack --watch",

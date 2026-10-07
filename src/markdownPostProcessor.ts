@@ -3,6 +3,7 @@ import { type PluginSettingsManager } from "./settings";
 import {
   addCopyButtonToCallout,
   addCopyPlainTextButtonToCalloutDiv,
+  addSelectCalloutButtonToCalloutDiv,
 } from "./utils/addCopyButtonToCallout";
 import { getCalloutBodyTextFromSectionInfo } from "./utils/getCalloutBodyText";
 
@@ -35,6 +36,12 @@ function postProcessMarkdown(
   addCopyPlainTextButtonToCalloutDiv({
     calloutNode: topLevelCallout,
     isCMCalloutNode,
+    pluginSettingsManager,
+  });
+  addSelectCalloutButtonToCalloutDiv({
+    calloutNode: topLevelCallout,
+    isCMCalloutNode,
+    ctx,
     pluginSettingsManager,
   });
   const nestedCallouts = topLevelCallout.findAll(".callout");

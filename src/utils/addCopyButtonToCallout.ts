@@ -1,7 +1,51 @@
 import classNames from "classnames";
+import { type MarkdownPostProcessorContext } from "obsidian";
 import { createCopyButton } from "../copyButton";
 import { type PluginSettingsManager } from "../settings";
+import {
+  selectCalloutInEditorViaCM,
+  selectCalloutInEditorViaSectionInfo,
+} from "./calloutEditorActions";
 import { getCalloutBodyPlainText } from "./getCalloutBodyText";
+
+/**
+ * Adds the "Select (in editor)" button to the given callout node. Clicking it selects the whole
+ * callout block as plain text in the editor (switching from Reading Mode to the editor if needed).
+ */
+export function addSelectCalloutButtonToCalloutDiv({
+  calloutNode,
+  isCMCalloutNode,
+  ctx,
+  pluginSettingsManager,
+}: {
+  calloutNode: HTMLElement;
+  isCMCalloutNode: boolean;
+  ctx: MarkdownPostProcessorContext | null;
+  pluginSettingsManager: PluginSettingsManager;
+}): void {
+  if (calloutNode.querySelector(".callout-copy-button-select") !== null) {
+    // Select button already exists; not adding another one
+    return;
+  }
+  const app = pluginSettingsManager.getApp();
+  addCopyButtonToCallout({
+    calloutNode,
+    getCalloutBodyText: () => null,
+    onSelect: async () => {
+      if (ctx !== null) {
+        const calloutSectionInfo = ctx.getSectionInfo(calloutNode);
+        if (calloutSectionInfo !== null) {
+          return await selectCalloutInEditorViaSectionInfo(app, calloutNode, calloutSectionInfo);
+        }
+      }
+      return await selectCalloutInEditorViaCM(app, calloutNode);
+    },
+    tooltipText: "Select (in editor)",
+    buttonClassName: "callout-copy-button-select",
+    isCMCalloutNode,
+    pluginSettingsManager,
+  });
+}
 
 export function addCopyPlainTextButtonToCalloutDiv({
   calloutNode,
@@ -29,6 +73,7 @@ export function addCopyPlainTextButtonToCalloutDiv({
 export function addCopyButtonToCallout({
   calloutNode,
   getCalloutBodyText,
+  onSelect,
   tooltipText,
   buttonClassName,
   isCMCalloutNode,
@@ -36,6 +81,7 @@ export function addCopyButtonToCallout({
 }: {
   calloutNode: HTMLElement;
   getCalloutBodyText: () => string | null;
+  onSelect?: (() => Promise<boolean>) | undefined;
   tooltipText: string;
   buttonClassName?: string | undefined;
   isCMCalloutNode: boolean;
@@ -44,6 +90,7 @@ export function addCopyButtonToCallout({
   const settingsClassName = pluginSettingsManager.getCopyButtonSettingsClassName();
   const copyButton = createCopyButton({
     getCalloutBodyText,
+    onSelect,
     className: classNames("callout-copy-button", buttonClassName, settingsClassName),
     tooltipText,
   });

@@ -38,7 +38,8 @@
   }
 
   &.callout-copy-button-plain-text::after,
-  &.callout-copy-button-markdown::after {
+  &.callout-copy-button-markdown::after,
+  &.callout-copy-button-select::after {
     font-size: 0.65em;
     position: absolute;
     top: 58%;
@@ -50,6 +51,9 @@
   }
   &.callout-copy-button-markdown::after {
     content: "M";
+  }
+  &.callout-copy-button-select::after {
+    content: "S";
   }
 }
 
@@ -66,6 +70,9 @@ div[data-mode="preview"] {
     display: none;
   }
   .callout-copy-button-plain-text:not(.show-reading-mode-copy-plain-text-buttons) {
+    display: none;
+  }
+  .callout-copy-button-select:not(.show-reading-mode-copy-select-buttons) {
     display: none;
   }
 }
